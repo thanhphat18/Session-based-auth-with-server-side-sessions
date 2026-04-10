@@ -3,12 +3,11 @@
   "version": "1.0.0",
   "description": "Auth backend for thesis project",
   "type": "module",
-  "main": "server.js",
+  "main": "config/server.js",
   "scripts": {
-  "start": "node config/server.js",
-  "dev": "nodemon config/server.js"
-}
-,
+    "start": "node config/server.js",
+    "dev": "nodemon config/server.js"
+  },
   "dependencies": {
     "bcrypt": "^5.1.1",
     "connect-mongo": "^5.1.0",
