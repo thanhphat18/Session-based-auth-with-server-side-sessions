@@ -13,6 +13,18 @@ import User from "../models/User.js";
 
 const router = express.Router();
 
+router.get("/register", (_req, res) => {
+  res.status(405).json({
+    message: "Use POST /api/auth/register to create an account.",
+  });
+});
+
+router.get("/login", (_req, res) => {
+  res.status(405).json({
+    message: "Use POST /api/auth/login to sign in.",
+  });
+});
+
 // ──────────────────────────────────────────────
 // 📌 ROUTE 1: REGISTER
 // POST /api/auth/register
@@ -22,7 +34,9 @@ router.post("/register", async (req, res) => {
   try {
     // 1. Pull data from the request body
     //    (what the frontend sent via the registration form)
-    const { username, email, password } = req.body;
+    const username = req.body.username?.trim();
+    const email = req.body.email?.trim().toLowerCase();
+    const password = req.body.password;
 
     // 2. Basic validation — make sure all fields exist
     if (!username || !email || !password) {
@@ -49,6 +63,7 @@ router.post("/register", async (req, res) => {
     // 6. Automatically log them in by creating a session
     //    req.session is our "locker" — we store the user's ID there
     req.session.userId = newUser._id;
+    await req.session.save();
 
     // 7. Send back success (never send password back!)
     res.status(201).json({
@@ -61,7 +76,24 @@ router.post("/register", async (req, res) => {
     });
   } catch (err) {
     console.error("Register error:", err);
-    res.status(500).json({ message: "Server error during registration" });
+    if (err.code === 11000) {
+      const duplicatedField = Object.keys(err.keyPattern || {})[0];
+      return res.status(409).json({
+        message: `${duplicatedField} already exists`,
+      });
+    }
+
+    if (err.name === "ValidationError") {
+      const firstError = Object.values(err.errors)[0];
+      return res.status(400).json({
+        message: firstError?.message || "Invalid registration data",
+      });
+    }
+
+    res.status(500).json({
+      message: "Server error during registration",
+      error: err.message,
+    });
   }
 });
 
@@ -72,7 +104,13 @@ router.post("/register", async (req, res) => {
 // ──────────────────────────────────────────────
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const email = req.body.email?.trim().toLowerCase();
+    const password = req.body.password;
+    console.log("Login payload:", {
+      email,
+      passwordType: typeof password,
+      passwordLength: typeof password === "string" ? password.length : null,
+    });
 
     // 1. Validate input
     if (!email || !password) {
@@ -83,6 +121,7 @@ router.post("/login", async (req, res) => {
     //    If not found, return a vague message (don't reveal "email not found"
     //    as that helps attackers know which emails are registered)
     const user = await User.findOne({ email });
+    console.log("Login user found:", Boolean(user));
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
@@ -90,12 +129,14 @@ router.post("/login", async (req, res) => {
     // 3. Compare the entered password against the stored hash
     //    using our custom comparePassword method from User.js
     const isMatch = await user.comparePassword(password);
+    console.log("Login password match:", isMatch);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
     // 4. Create session — store user ID in the session locker
     req.session.userId = user._id;
+    await req.session.save();
 
     // 5. Respond with user data (no password!)
     res.json({
@@ -108,7 +149,10 @@ router.post("/login", async (req, res) => {
     });
   } catch (err) {
     console.error("Login error:", err);
-    res.status(500).json({ message: "Server error during login" });
+    res.status(500).json({
+      message: "Server error during login",
+      error: err.message,
+    });
   }
 });
 

@@ -50,20 +50,15 @@ const userSchema = new mongoose.Schema(
 //
 // Why? If your database is ever hacked, attackers can't read passwords.
 
-userSchema.pre("save", async function (next) {
+userSchema.pre("save", async function () {
   // "this" refers to the user document being saved
 
   // Only hash the password if it was just set or changed.
   // (Prevents double-hashing if user updates their email, for example)
-  if (!this.isModified("password")) return next();
+  if (!this.isModified("password")) return;
 
-  try {
-    const saltRounds = 10; // Higher = more secure but slower. 10 is standard.
-    this.password = await bcrypt.hash(this.password, saltRounds);
-    next(); // Continue saving
-  } catch (err) {
-    next(err); // Pass error to Express error handler
-  }
+  const saltRounds = 10; // Higher = more secure but slower. 10 is standard.
+  this.password = await bcrypt.hash(this.password, saltRounds);
 });
 
 // ── INSTANCE METHOD ────────────────────────────
