@@ -1,0 +1,65 @@
+:root {
+  font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #f4efe6;
+  background:
+    radial-gradient(circle at top, rgba(230, 150, 88, 0.16), transparent 30%),
+    linear-gradient(145deg, #15242c 0%, #0d1519 45%, #081014 100%);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  --surface: rgba(13, 28, 34, 0.82);
+  --surface-strong: rgba(10, 21, 26, 0.94);
+  --surface-soft: rgba(255, 255, 255, 0.06);
+  --border: rgba(255, 255, 255, 0.12);
+  --text-main: #f4efe6;
+  --text-muted: #b9c5c8;
+  --accent: #e59a54;
+  --accent-strong: #f0b06d;
+  --danger: #ff8f82;
+  --shadow: 0 30px 70px rgba(0, 0, 0, 0.28);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  color: var(--text-main);
+  background:
+    radial-gradient(circle at top, rgba(230, 150, 88, 0.16), transparent 30%),
+    linear-gradient(145deg, #15242c 0%, #0d1519 45%, #081014 100%);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 36px 36px;
+  mask-image: radial-gradient(circle at center, black, transparent 80%);
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input {
+  font: inherit;
+}
